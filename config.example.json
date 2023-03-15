@@ -1,7 +1,7 @@
 {
     "server": "imap.gmail.com",
-    "username": "zgs225@gmail.com",
-    "password": "uilrjaujrpzrhdmo",
+    "username": "",
+    "password": "",
     "since": "2023-01-01",
     "proxy": "127.0.0.1:7890",
     "download_dir": "./attachments"
