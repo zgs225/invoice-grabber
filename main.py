@@ -12,6 +12,10 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 import time
 
+from aip import AipOcr
+import shutil
+import csv
+
 
 def load_config():
     # Load config from json file
@@ -191,9 +195,115 @@ def roam(cfg):
     M.logout()
 
 
+def get_file_content(filepath):
+    with open(filepath, "rb+") as f:
+        return f.read()
+
+
+def recognize_invoices(cfg):
+    client = AipOcr(
+        cfg["baidu_ocr"]["app_id"],
+        cfg["baidu_ocr"]["api_key"],
+        cfg["baidu_ocr"]["secret_key"],
+    )
+
+    files = os.listdir(cfg["download_dir"])
+    entities = {}
+
+    for filename in files:
+        if not filename.endswith(".pdf"):
+            continue
+
+        print(f"Recognizing {filename}...")
+        filepath = os.path.join(cfg["download_dir"], filename)
+        pdf_file = get_file_content(filepath)
+        res = client.vatInvoicePdf(pdf_file)
+
+        if "error_code" in res:
+            print("Error recognizing file: " + res["error_msg"])
+            continue
+
+        entities[filename] = res
+
+    with open(cfg["recognized_json"], "w+", encoding="utf-8") as f:
+        json.dump(entities, f, indent=4, ensure_ascii=False)
+        print(f"Saved recognized results to {cfg['recognized_json']}")
+
+
+def load_recognized_invoices(cfg):
+    filepath = cfg["recognized_json"]
+    with open(filepath, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def rename_invoices(cfg):
+    invoices = load_recognized_invoices(cfg)
+    download_dir = cfg["download_dir"]
+    output_dir = cfg["output"]["dir"]
+    name = cfg["output"]["name"]
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    for filename, invoice in invoices.items():
+        total_amount = invoice["words_result"]["TotalAmount"]
+        filename2 = f"{name} 发票 {total_amount}.pdf"
+        file1 = os.path.join(download_dir, filename)
+        file2 = check_and_rename_file(output_dir, filename2)
+        shutil.copy(file1, file2)
+        print(f"Copied {filename} to {file2}")
+
+
+def generate_excel_records(cfg):
+    invoices = load_recognized_invoices(cfg).values()
+    output_dir = cfg["output"]["dir"]
+    csv_file = cfg["output"]["result_csv"]
+    name = cfg["output"]["name"]
+    csv_filepath = os.path.join(output_dir, csv_file)
+    data = []
+    index = 0
+
+    sorted_invoices = sorted(invoices, key=lambda x: x["words_result"]["InvoiceDate"])
+
+    for invoice in sorted_invoices:
+        total_amount = float(invoice["words_result"]["TotalAmount"])
+        index += 1
+        invoice_date = invoice["words_result"]["InvoiceDate"]
+        seller_name = invoice["words_result"]["SellerName"]
+
+        data.append(
+            {
+                "序号": index,
+                "用餐日期": invoice_date[5:],
+                "用餐缘由": "加班",
+                "用餐商户名称": seller_name,
+                "总人数": "1",
+                "人员名单": name,
+                "发票金额": total_amount,
+                "按标准应报销金额": 50 if total_amount > 50 else total_amount,
+                "责任部门": "区块链创新应用部",
+                "经办人/报销人": name,
+            }
+        )
+
+    if len(data) == 0:
+        print("No data to generate")
+        return
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(csv_filepath, "w+") as f:
+        writer = csv.DictWriter(f, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
+        print(f"Saved result to {csv_filepath}")
+
+
 def main():
     cfg = load_config()
-    roam(cfg)
+    # roam(cfg)
+    # recognize_invoices(cfg)
+    # rename_invoices(cfg)
+    generate_excel_records(cfg)
 
 
 if __name__ == "__main__":

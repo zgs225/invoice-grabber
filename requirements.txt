@@ -1,3 +1,5 @@
-PySocks=1.7.1
+PySocks==1.7.1
 requests
 selenium
+baidu-aip
+chardet
