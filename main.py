@@ -140,9 +140,13 @@ def roam(cfg):
     since = cfg["since"]
     since_date = datetime.datetime.strptime(since, "%Y-%m-%d").date()
     since = since_date.strftime("%d-%b-%Y")
-    crit = f'(SINCE "{since}")'
+    util = datetime.datetime.today().strftime("%d-%b-%Y")
+    if 'util' in cfg:
+        util_date = datetime.datetime.strptime(cfg["util"], "%Y-%m-%d").date()
+        util = util_date.strftime("%d-%b-%Y")
+    crit = f'(SINCE "{since}" BEFORE "{util}")'
 
-    print(f"Searching for messages since {since}...")
+    print(f"Searching for messages since {since} util {util}...")
     typ, data = M.search(None, crit)
 
     if typ != "OK":
