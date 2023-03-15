@@ -18,7 +18,7 @@ README
 该脚本执行4个步骤的操作：
 
 * 下载：从邮箱中下载发票到 `config.download_dir` 中
-* OCR: 将 `config.download_dir` 中的发票通过百度 OCR 识别，并将结果写入 `config.recognized_json` 中
+* OCR: 将 `config.download_dir` 中的发票通过百度 OCR 识别，并将结果写入 `config.output.recognized_json` 中
 * 重命名：根据发票信息重命名成报销需要的名称到 `config.output.dir` 目录
 * 生成报销记录：生成报销记录到 `config.output.result_csv` 中
 
