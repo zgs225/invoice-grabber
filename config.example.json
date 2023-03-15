@@ -1,8 +1,19 @@
 {
-    "server": "imap.gmail.com",
+    "server": "",
     "username": "",
     "password": "",
     "since": "2023-01-01",
-    "proxy": "127.0.0.1:7890",
-    "download_dir": "./attachments"
+    "proxy": "",
+    "download_dir": "./attachments",
+    "baidu_ocr": {
+        "app_id": "",
+        "api_key": "",
+        "secret_key": ""
+    },
+    "recognized_json": "./recognized.json",
+    "output": {
+        "name": "",
+        "dir": "./output",
+        "result_csv": "result.csv"
+    }
 }

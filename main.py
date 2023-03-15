@@ -1,20 +1,20 @@
-import json
-from imaplib import IMAP4_SSL
+import csv
 import datetime
 import email
+from imaplib import IMAP4_SSL
+import json
 import os
-from selenium.webdriver.common.by import By
-import socks
 import re
-import requests
-
-from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options
+import shutil
+import sys
 import time
 
 from aip import AipOcr
-import shutil
-import csv
+import requests
+from selenium.webdriver import Firefox
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+import socks
 
 
 def load_config():
@@ -298,12 +298,28 @@ def generate_excel_records(cfg):
         print(f"Saved result to {csv_filepath}")
 
 
+def print_usage():
+    print("Usage: python3 main.py [--no-email] [--no-ocr] [--no-rename] [--no-excel]")
+
+
 def main():
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print_usage()
+        return
+
     cfg = load_config()
-    # roam(cfg)
-    # recognize_invoices(cfg)
-    # rename_invoices(cfg)
-    generate_excel_records(cfg)
+
+    if "--no-email" not in sys.argv:
+        roam(cfg)
+
+    if "--no-ocr" not in sys.argv:
+        recognize_invoices(cfg)
+
+    if "--no-rename" not in sys.argv:
+        rename_invoices(cfg)
+
+    if "--no-excel" not in sys.argv:
+        generate_excel_records(cfg)
 
 
 if __name__ == "__main__":
