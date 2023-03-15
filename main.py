@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import sys
 import time
 
@@ -123,9 +124,23 @@ def try_download_file_from_quanjia(cfg, msg):
 
 def roam(cfg):
     # Set proxy if needed
-    if cfg["proxy"]:
-        print("Setting proxy...")
-        socks.set_default_proxy(socks.SOCKS5, cfg["proxy"])
+    if cfg.get("proxy", None):
+        print(f"Setting proxy to {cfg['proxy']}...")
+        proxy_protocol, proxy_addr = cfg["proxy"].split("://")
+        proxy_protocol = proxy_protocol.lower()
+        proxy_type = None
+        if proxy_protocol == "socks4":
+            proxy_type = socks.SOCKS4
+        elif proxy_protocol == "socks5":
+            proxy_type = socks.SOCKS5
+        elif proxy_protocol == "http":
+            proxy_type = socks.HTTP
+        else:
+            raise ValueError(f"Unknown proxy protocol: {proxy_protocol}")
+        proxy_host, proxy_port = proxy_addr.split(":")
+        proxy_port = int(proxy_port)
+        socks.set_default_proxy(proxy_type, proxy_host, proxy_port)
+        socket.socket = socks.socksocket
 
     # Connect to the server
     print("Connecting to server {}...".format(cfg["server"]))
