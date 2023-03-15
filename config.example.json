@@ -10,9 +10,9 @@
         "api_key": "",
         "secret_key": ""
     },
-    "recognized_json": "./recognized.json",
     "output": {
-        "name": "",
+        "recognized_json": "recognized.json",
+        "name": "张三",
         "dir": "./output",
         "result_csv": "result.csv"
     }

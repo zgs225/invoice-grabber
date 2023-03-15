@@ -225,13 +225,19 @@ def recognize_invoices(cfg):
 
         entities[filename] = res
 
-    with open(cfg["recognized_json"], "w+", encoding="utf-8") as f:
+    output_dir = cfg["output"]["dir"]
+    recognized_json = cfg["output"]["recognized_json"]
+    os.makedirs(output_dir, exist_ok=True)
+    filepath = os.path.join(output_dir, recognized_json)
+    with open(filepath, "w+", encoding="utf-8") as f:
         json.dump(entities, f, indent=4, ensure_ascii=False)
-        print(f"Saved recognized results to {cfg['recognized_json']}")
+        print(f"Saved recognized results to {filepath}")
 
 
 def load_recognized_invoices(cfg):
-    filepath = cfg["recognized_json"]
+    output_dir = cfg["output"]["dir"]
+    recognized_json = cfg["output"]["recognized_json"]
+    filepath = os.path.join(output_dir, recognized_json)
     with open(filepath, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -245,7 +251,7 @@ def rename_invoices(cfg):
     os.makedirs(output_dir, exist_ok=True)
 
     for filename, invoice in invoices.items():
-        total_amount = invoice["words_result"]["TotalAmount"]
+        total_amount = invoice["words_result"]["AmountInFiguers"]
         filename2 = f"{name} 发票 {total_amount}.pdf"
         file1 = os.path.join(download_dir, filename)
         file2 = check_and_rename_file(output_dir, filename2)
@@ -265,7 +271,7 @@ def generate_excel_records(cfg):
     sorted_invoices = sorted(invoices, key=lambda x: x["words_result"]["InvoiceDate"])
 
     for invoice in sorted_invoices:
-        total_amount = float(invoice["words_result"]["TotalAmount"])
+        total_amount = float(invoice["words_result"]["AmountInFiguers"])
         index += 1
         invoice_date = invoice["words_result"]["InvoiceDate"]
         seller_name = invoice["words_result"]["SellerName"]
