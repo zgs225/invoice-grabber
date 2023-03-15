@@ -8,6 +8,7 @@ README
 
 * python 3.x
 * Firefox
+* 百度智能云文字识别账号
 
 ## 使用方式
 
