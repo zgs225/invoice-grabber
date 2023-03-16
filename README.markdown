@@ -29,3 +29,22 @@ README
 * `--no-ocr`: 跳过 OCR
 * `--no-rename`: 跳过重命名
 * `--no-excel`: 跳过生成报销记录
+
+## 配置
+
+配置文件 `config.json` 中包含了以下信息：
+
+`server`：IMAP4 邮件服务器地址；
+`username`：登录邮箱的用户名；
+`password`：登录邮箱的密码；
+`proxy`：代理服务器地址,支持 socks4, socks5 和 http;
+`download_dir`：电子发票保存的目录；
+`since`：搜索电子发票的起始日期；
+`util`：搜索电子发票的截止日期；
+`baidu_ocr.app_id`：百度 OCR 应用 ID；
+`baidu_ocr.api_key`：百度 OCR API Key；
+`baidu_ocr.secret_key`：百度 OCR Secret Key；
+`output.recognized_json`：保存 OCR 结果的文件，格式为 `json`;
+`output.name`：你的名字，用于发票的重命名和报销记录的生成;
+`output.dir`：保存 OCR 结果、重命名发票文件和报销记录的目录;
+`output.result_csv`：保存生成的报销记录的文件，格式为 `csv`;
