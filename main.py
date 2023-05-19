@@ -243,6 +243,7 @@ def recognize_invoices(cfg):
             continue
 
         entities[filename] = res
+        time.sleep(0.5)
 
     output_dir = cfg["output"]["dir"]
     recognized_json = cfg["output"]["recognized_json"]
@@ -279,7 +280,15 @@ def rename_invoices(cfg):
 
 
 def generate_excel_records(cfg):
-    invoices = load_recognized_invoices(cfg).values()
+    all_invoices = load_recognized_invoices(cfg)
+    overrides = cfg["output"]["invoice_date_overrides"] or {}
+
+    for k, v in all_invoices.items():
+        if k in overrides:
+            v["words_result"]["InvoiceDate"] = overrides[k]
+            print(f"Overriding invoice date for {k} to {overrides[k]}")
+
+    invoices = all_invoices.values()
     output_dir = cfg["output"]["dir"]
     csv_file = cfg["output"]["result_csv"]
     name = cfg["output"]["name"]
