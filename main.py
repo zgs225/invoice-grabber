@@ -1,5 +1,6 @@
 import csv
 import datetime
+import decimal
 import email
 from imaplib import IMAP4_SSL
 import json
@@ -254,12 +255,24 @@ def recognize_invoices(cfg):
         print(f"Saved recognized results to {filepath}")
 
 
-def load_recognized_invoices(cfg):
+def load_recognized_invoices(cfg, overrides=True):
     output_dir = cfg["output"]["dir"]
     recognized_json = cfg["output"]["recognized_json"]
     filepath = os.path.join(output_dir, recognized_json)
     with open(filepath, "r", encoding="utf-8") as f:
-        return json.load(f)
+        all_invoices = json.load(f)
+
+        if not overrides:
+            return all_invoices
+
+        overrides = cfg["output"]["invoice_date_overrides"] or {}
+
+        for k, v in all_invoices.items():
+            if k in overrides:
+                v["words_result"]["InvoiceDate"] = overrides[k]
+                print(f"Overriding invoice date for {k} to {overrides[k]}")
+
+        return all_invoices
 
 
 def rename_invoices(cfg):
@@ -280,15 +293,7 @@ def rename_invoices(cfg):
 
 
 def generate_excel_records(cfg):
-    all_invoices = load_recognized_invoices(cfg)
-    overrides = cfg["output"]["invoice_date_overrides"] or {}
-
-    for k, v in all_invoices.items():
-        if k in overrides:
-            v["words_result"]["InvoiceDate"] = overrides[k]
-            print(f"Overriding invoice date for {k} to {overrides[k]}")
-
-    invoices = all_invoices.values()
+    invoices = load_recognized_invoices(cfg).values()
     output_dir = cfg["output"]["dir"]
     csv_file = cfg["output"]["result_csv"]
     name = cfg["output"]["name"]
@@ -331,6 +336,34 @@ def generate_excel_records(cfg):
         writer.writerows(data)
         print(f"Saved result to {csv_filepath}")
 
+def generate_summary_file(cfg):
+    invoices = load_recognized_invoices(cfg).values()
+    output_dir = cfg["output"]["dir"]
+    summary_file = os.path.join(output_dir, 'summary.txt')
+    title = '餐费报销汇总'
+    total_amount = decimal.Decimal(0)
+    invoice_dates = []
+    name = cfg["output"]["name"]
+
+    sorted_invoices = sorted(invoices, key=lambda x: x["words_result"]["InvoiceDate"])
+
+    for invoice in sorted_invoices:
+        amount = decimal.Decimal(invoice["words_result"]["AmountInFiguers"])
+        amount = decimal.Decimal(50) if amount > decimal.Decimal(50) else amount
+        total_amount += amount
+        invoice_dates.append(invoice["words_result"]["InvoiceDate"])
+
+    with open(summary_file, 'w+') as f:
+        f.write(f'{title}\n\n')
+        f.write(f'报销人: {name}\n')
+        f.write(f'部门: 区块链创新应用部\n')
+        f.write(f'共计 {len(invoice_dates)} 天，共计 {str(total_amount)} 元\n')
+        f.write(f'日期：\n')
+        for date in invoice_dates:
+            f.write(f'\t{date}\n')
+        print(f"Saved summary to {summary_file}")
+
+    pass
 
 def print_usage():
     print("Usage: python3 main.py [--no-email] [--no-ocr] [--no-rename] [--no-excel]")
@@ -354,6 +387,9 @@ def main():
 
     if "--no-excel" not in sys.argv:
         generate_excel_records(cfg)
+
+    if "--no-summary" not in sys.argv:
+        generate_summary_file(cfg)
 
 
 if __name__ == "__main__":
