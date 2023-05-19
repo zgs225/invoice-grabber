@@ -15,6 +15,11 @@
         "recognized_json": "recognized.json",
         "name": "张三",
         "dir": "./output",
-        "result_csv": "result.csv"
+        "result_csv": "result.csv",
+        "invoice_date_overrides": {
+            "便利蜂电子发票_23.pdf": "2023年04月13日",
+            "便利蜂电子发票_24.pdf": "2023年04月17日",
+            "便利蜂电子发票_25.pdf": "2023年04月27日"
+        }
     }
 }
