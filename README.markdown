@@ -22,6 +22,7 @@ README
 * OCR: 将 `config.download_dir` 中的发票通过百度 OCR 识别，并将结果写入 `config.output.recognized_json` 中
 * 重命名：根据发票信息重命名成报销需要的名称到 `config.output.dir` 目录
 * 生成报销记录：生成报销记录到 `config.output.result_csv` 中
+* 生成报销摘要文件：生成摘要文件到 `config.output/summary.txt` 中
 
 在运行脚本时，可以通过添加参数跳过上述的任意阶段：
 
@@ -29,6 +30,7 @@ README
 * `--no-ocr`: 跳过 OCR
 * `--no-rename`: 跳过重命名
 * `--no-excel`: 跳过生成报销记录
+* `--no-summary`: 跳过报销摘要文件生成
 
 ## 配置
 
@@ -48,3 +50,4 @@ README
 * `output.name`：你的名字，用于发票的重命名和报销记录的生成;
 * `output.dir`：保存 OCR 结果、重命名发票文件和报销记录的目录;
 * `output.result_csv`：保存生成的报销记录的文件，格式为 `csv`;
+* `output.invoice_date_overrides`：开票日期覆盖。key 是要覆盖的发票的原始文件名；
