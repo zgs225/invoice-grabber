@@ -156,7 +156,7 @@ def roam(cfg):
     since_date = datetime.datetime.strptime(since, "%Y-%m-%d").date()
     since = since_date.strftime("%d-%b-%Y")
     util = datetime.datetime.today().strftime("%d-%b-%Y")
-    if 'util' in cfg:
+    if 'util' in cfg and len(cfg["util"]) > 0:
         util_date = datetime.datetime.strptime(cfg["util"], "%Y-%m-%d").date()
         util = util_date.strftime("%d-%b-%Y")
     crit = f'(SINCE "{since}" BEFORE "{util}")'
